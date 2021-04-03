@@ -15,6 +15,9 @@ interface CustomEnv {
     user: string;
     password: string;
     schema: string;
+  },
+  secrets: {
+    JWT: string;
   }
 }
 
@@ -32,6 +35,9 @@ const dev: CustomEnv = {
     user: 'gideon',
     password: process.env.DB_PASSWORD as string,
     schema: 'API_GATEWAY',
+  },
+  secrets: {
+    JWT: process.env.JWTSecret as string,
   }
 };
 
