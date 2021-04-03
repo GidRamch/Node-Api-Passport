@@ -25,7 +25,7 @@ const dev: CustomEnv = {
   app: {
     host: '0.0.0.0',
     protocol: 'http',
-    port: 3000,
+    port:3050,
   },
   db: {
     host: '127.0.0.1',

@@ -5,7 +5,7 @@ import { callProcedure } from '../../services/mysql';
 
 export const login = async (EMAIL: string, PASSWORD: string): Promise<unknown> => {
   const mysqlData = await callProcedure(
-    'READ$USER_ACCOUNT_PASSWORD_VIA_EMAIL',
+    'READ$USER_PASSWORD_VIA_EMAIL',
     { EMAIL }
   );
 
