@@ -43,8 +43,9 @@ router.post(
     try {
       const EMAIL = req.body.email;
       const PASSWORD = req.body.password;
+      const APP_ID = req.body.appId;
 
-      const data = await register(EMAIL, PASSWORD);
+      const data = await register(EMAIL, PASSWORD, APP_ID);
 
       res.status(200).send(data);
 

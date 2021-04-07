@@ -1,6 +1,8 @@
+import config from '../../../config/config';
 import { AppError } from '../../models/AppError';
 import { compareHash, getHash } from '../../services/hasher';
 import { signData, verifyToken } from '../../services/jwt';
+import { sendMail } from '../../services/maling';
 import { callProcedure } from '../../services/mysql';
 
 
@@ -34,7 +36,7 @@ const getUserInfo = async (EMAIL: string): Promise<any> => {
 };
 
 
-export const register = async (EMAIL: string, PASSWORD: string): Promise<unknown> => {
+export const register = async (EMAIL: string, PASSWORD: string, APP_ID: string): Promise<unknown> => {
 
   const hashedPassword = await getHash(PASSWORD);
 
@@ -49,7 +51,17 @@ export const register = async (EMAIL: string, PASSWORD: string): Promise<unknown
   // CREATE VERIFICATION TOKEN
   const token = await signData({ email: EMAIL });
 
+  const client = config.clients[APP_ID];
+
   // SEND EMAIL
+
+  sendMail({
+    to: [EMAIL],
+    subject: 'Account Created!',
+    text: `Your account has been created! Please click the following link to verify your account:\n
+      ${client.protocol}://${client.host}:${client.port}/verify-user/${token}
+    `,
+  });
 
   return mysqlData;
 };

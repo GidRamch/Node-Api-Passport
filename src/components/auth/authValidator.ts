@@ -1,53 +1,54 @@
 import { body, param, ValidationChain } from 'express-validator';
 
+const email = [
+  body('email', 'You must provide an email!').exists(),
+  body('email', 'Email must be a string!').isString(),
+  body('email', 'Email must be atleast 5 characters long!').isLength({ min: 5 }),
+  body('email', 'Email must be at most 30 characters long!').isLength({ max: 30 }),
+  body('email', 'Please enter valid email!').isEmail(),
+];
+
+const password = [
+  body('password', 'You must provide an password!').exists(),
+  body('password', 'Password must be a string!').isString(),
+  body('password', 'Password must be atleast 5 characters long!').isLength({ min: 5 }),
+  body('password', 'Password must be at most 20 characters long!').isLength({ max: 20 }),
+];
+
+const token = [
+  param('token', 'You must provide a valid verification token!').exists(),
+  param('token', 'You must provide a valid verification token!').isJWT(),
+];
+
+const appId = [
+  body('appId', 'You must provide a valid app id!').exists(),
+  body('appId', 'App ID must be a string').isString(),
+];
+
 
 const rules: Record<string, ValidationChain[]> = {
   login: [
-    body('email', 'You must provide an email!').exists(),
-    body('email', 'Email must be a string!').isString(),
-    body('email', 'Email must be atleast 5 characters long!').isLength({ min: 5 }),
-    body('email', 'Email must be at most 30 characters long!').isLength({ max: 30 }),
-    body('email', 'Please enter valid email!').isEmail(),
-
-    body('password', 'You must provide an password!').exists(),
-    body('password', 'Password must be a string!').isString(),
-    body('password', 'Password must be atleast 5 characters long!').isLength({ min: 5 }),
-    body('password', 'Password must be at most 20 characters long!').isLength({ max: 20 }),
+    ...email,
+    ...password,
   ],
   register: [
-    body('email', 'You must provide an email!').exists(),
-    body('email', 'Email must be a string!').isString(),
-    body('email', 'Email must be atleast 5 characters long!').isLength({ min: 5 }),
-    body('email', 'Email must be at most 30 characters long!').isLength({ max: 30 }),
-    body('email', 'Please enter valid email!').isEmail(),
-
-    body('password', 'You must provide an password!').exists(),
-    body('password', 'Password must be a string!').isString(),
-    body('password', 'Password must be atleast 5 characters long!').isLength({ min: 5 }),
-    body('password', 'Password must be at most 20 characters long!').isLength({ max: 20 }),
+    ...email,
+    ...password,
+    ...appId,
   ],
 
   'verify-user': [
-    param('token', 'You must provide a valid verification token!').exists(),
-    param('token', 'You must provide a valid verification token!').isJWT(),
+    ...token,
   ],
 
 
   'forgot-password': [
-    body('email', 'You must provide an email!').exists(),
-    body('email', 'Email must be a string!').isString(),
-    body('email', 'Email must be atleast 5 characters long!').isLength({ min: 5 }),
-    body('email', 'Email must be at most 30 characters long!').isLength({ max: 30 }),
-    body('email', 'Please enter valid email!').isEmail(),
+    ...email,
   ],
 
   'reset-password': [
-    param('token', 'You must provide a valid verification token!').exists(),
-    param('token', 'You must provide a valid verification token!').isJWT(),
-    body('password', 'You must provide an password!').exists(),
-    body('password', 'Password must be a string!').isString(),
-    body('password', 'Password must be atleast 5 characters long!').isLength({ min: 5 }),
-    body('password', 'Password must be at most 20 characters long!').isLength({ max: 20 }),
+    ...token,
+    ...password,
   ]
 };
 

@@ -2,14 +2,22 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// INTERFACE TO STRONGLY TYPE
+// INTERFACES TO STRONGLY TYPE
+
+
+interface URL {
+  host: string;
+  protocol: string;
+  port: number;
+}
+
+interface MailingUrl extends URL {
+  from: string;
+}
 
 interface CustomEnv {
-  app: {
-    host: string;
-    protocol: string;
-    port: number;
-  },
+  app: URL,
+  mailing: MailingUrl,
   db: {
     host: string;
     user: string;
@@ -18,7 +26,10 @@ interface CustomEnv {
   },
   secrets: {
     JWT: string;
-  }
+  },
+  clients: {
+    [id: string]: URL,
+  };
 }
 
 
@@ -30,6 +41,12 @@ const dev: CustomEnv = {
     protocol: 'http',
     port:3050,
   },
+  mailing: {
+    host: '0.0.0.0',
+    protocol: 'http',
+    port: 3333,
+    from: 'Gideon Ramcharan <gidramch@gmail.com>',
+  },
   db: {
     host: '127.0.0.1',
     user: 'gideon',
@@ -38,7 +55,14 @@ const dev: CustomEnv = {
   },
   secrets: {
     JWT: process.env.JWTSecret as string,
-  }
+  },
+  clients: {
+    template_app: {
+      host: '0.0.0.0',
+      port: 3055,
+      protocol: 'http',
+    },
+  },
 };
 
 // const sandbox: CustomEnv = {
