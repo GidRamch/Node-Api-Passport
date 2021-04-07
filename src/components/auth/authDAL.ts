@@ -23,14 +23,14 @@ export const login = async (EMAIL: string, PASSWORD: string): Promise<unknown> =
 };
 
 
-const getUserInfo = async (EMAIL: string): Promise<any> => {
+const getUserInfo = async (EMAIL: string, onlyVerified = true): Promise<any> => {
   const mysqlData = await callProcedure(
     'READ$USER_INFO_VIA_EMAIL',
     { EMAIL }
   );
 
   if (!mysqlData?.PASSWORD) { throw new AppError(`No Password found for given email: ${EMAIL}`, 'Unauthorized', 403); }
-  if (!mysqlData?.VERIFIED) { throw new AppError(`Account not verified: ${EMAIL}`, 'Not Verified!', 403); }
+  if (!mysqlData?.VERIFIED && onlyVerified) { throw new AppError(`Account not verified: ${EMAIL}`, 'Not Verified!', 403); }
 
   return mysqlData;
 };
@@ -83,14 +83,24 @@ export const verifyUser = async (TOKEN: string): Promise<unknown> => {
 };
 
 
-export const forgotPassword = async (EMAIL: string): Promise<unknown> => {
-  const userInfo = await getUserInfo(EMAIL);
+export const forgotPassword = async (EMAIL: string, APP_ID: string): Promise<unknown> => {
+  const userInfo = await getUserInfo(EMAIL, false);
 
   const token = await signData({ email: EMAIL }, '15m');
 
   delete userInfo.PASSWORD;
 
+  const client = config.clients[APP_ID];
+
   // SEND EMAIL
+
+  sendMail({
+    to: [EMAIL],
+    subject: 'Reset Password!',
+    text: `You may reset your password by following this link below:\n
+      ${client.protocol}://${client.host}:${client.port}/reset-password/${token}
+    `,
+  });
 
   return userInfo;
 };

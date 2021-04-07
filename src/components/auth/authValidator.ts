@@ -44,6 +44,7 @@ const rules: Record<string, ValidationChain[]> = {
 
   'forgot-password': [
     ...email,
+    ...appId,
   ],
 
   'reset-password': [

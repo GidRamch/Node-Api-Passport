@@ -88,8 +88,9 @@ router.post(
 
     try {
       const EMAIL = req.body.email;
+      const APP_ID = req.body.appId;
 
-      const data = await forgotPassword(EMAIL);
+      const data = await forgotPassword(EMAIL, APP_ID);
 
       res.status(200).send(data);
 
