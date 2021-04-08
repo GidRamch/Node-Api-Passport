@@ -59,7 +59,7 @@ export const register = async (EMAIL: string, PASSWORD: string, APP_ID: string):
     to: [EMAIL],
     subject: 'Account Created!',
     text: `Your account has been created! Please click the following link to verify your account:\n
-      ${client.protocol}://${client.host}:${client.port}/verify-user/${token}
+      ${client.protocol}://${client.host}:${client.port}/verify-user?token=${token}
     `,
   });
 
@@ -86,7 +86,7 @@ export const verifyUser = async (TOKEN: string): Promise<unknown> => {
 export const forgotPassword = async (EMAIL: string, APP_ID: string): Promise<unknown> => {
   const userInfo = await getUserInfo(EMAIL, false);
 
-  const token = await signData({ email: EMAIL }, '15m');
+  const token = await signData({ email: EMAIL }, '15m', userInfo.PASSWORD);
 
   delete userInfo.PASSWORD;
 
@@ -98,7 +98,7 @@ export const forgotPassword = async (EMAIL: string, APP_ID: string): Promise<unk
     to: [EMAIL],
     subject: 'Reset Password!',
     text: `You may reset your password by following this link below:\n
-      ${client.protocol}://${client.host}:${client.port}/reset-password/${token}
+      ${client.protocol}://${client.host}:${client.port}/reset-password?token=${token}?email=${EMAIL}
     `,
   });
 
@@ -106,11 +106,15 @@ export const forgotPassword = async (EMAIL: string, APP_ID: string): Promise<unk
 };
 
 
-export const resetPassword = async (PASSWORD: string, TOKEN: string): Promise<unknown> => {
-  const tokenData = await verifyToken(TOKEN)
+export const resetPassword = async (PASSWORD: string, TOKEN: string, EMAIL: string): Promise<unknown> => {
+  const userInfo = await getUserInfo(EMAIL, false);
+
+  const tokenData = await verifyToken(TOKEN, userInfo.PASSWORD)
     .catch((err: Error) => {
       throw new AppError(err.message, 'Bad Request', 400);
     });
+
+  if (tokenData.email !== EMAIL) { throw new AppError('RESET PASSWORD -> Token email and input email did not match', 'Bad Request', 400);}
 
   const hashedPassword = await getHash(PASSWORD);
 

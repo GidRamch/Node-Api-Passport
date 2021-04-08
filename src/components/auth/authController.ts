@@ -112,9 +112,10 @@ router.put(
 
     try {
       const PASSWORD = req.body.password;
+      const EMAIL = req.body.email;
       const TOKEN = req.params.token;
 
-      const data = await resetPassword(PASSWORD, TOKEN);
+      const data = await resetPassword(PASSWORD, TOKEN, EMAIL);
 
       res.status(200).send(data);
 

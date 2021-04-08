@@ -50,6 +50,7 @@ const rules: Record<string, ValidationChain[]> = {
   'reset-password': [
     ...token,
     ...password,
+    ...email,
   ]
 };
 
