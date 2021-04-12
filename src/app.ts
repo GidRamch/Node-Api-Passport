@@ -6,7 +6,9 @@ import { handleError } from './services/error-handler';
 import { logger } from './services/logger';
 
 
-const app = express();    // Create express app
+/** Create Express App */
+
+const app = express();    
 
 
 /** Use Third Party Middleware */
@@ -37,4 +39,6 @@ process.on('uncaughtException', (err: Error) => {
 });
 
 
-export default app;   // export app to be served
+/** Export app to be served */
+
+export default app;

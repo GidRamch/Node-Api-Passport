@@ -47,13 +47,9 @@ export const register = async (EMAIL: string, PASSWORD: string, APP_ID: string):
 
   if (!mysqlData?.ID) { throw new Error(`Failed to create user with email: ${EMAIL}`); }
 
-
-  // CREATE VERIFICATION TOKEN
   const token = await signData({ email: EMAIL });
 
   const client = config.clients[APP_ID];
-
-  // SEND EMAIL
 
   sendMail({
     to: [EMAIL],
@@ -91,8 +87,6 @@ export const forgotPassword = async (EMAIL: string, APP_ID: string): Promise<unk
   delete userInfo.PASSWORD;
 
   const client = config.clients[APP_ID];
-
-  // SEND EMAIL
 
   sendMail({
     to: [EMAIL],
