@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { components } from './components/components';
 import { handleError } from './services/error-handler';
 import { logger } from './services/logger';
+import { passportInitialize } from './services/passport';
 
 
 /** Create Express App */
@@ -16,6 +17,7 @@ const app = express();
 app.use(helmet());
 app.use(express.json());
 
+passportInitialize();
 
 /** Use App Middleware */
 

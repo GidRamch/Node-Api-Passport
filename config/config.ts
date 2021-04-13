@@ -26,6 +26,8 @@ interface CustomEnv {
   },
   secrets: {
     JWT: string;
+    googleDesktopClientId: string;
+    googleDesktopClientSecret: string;
   },
   clients: {
     [id: string]: URL,
@@ -55,6 +57,8 @@ const dev: CustomEnv = {
   },
   secrets: {
     JWT: process.env.JWTSecret as string,
+    googleDesktopClientId: process.env.GOOGLE_DESKTOP_CLIENT_ID as string,
+    googleDesktopClientSecret: process.env.GOOGLE_DESKTOP_CLIENT_SECRET as string,
   },
   clients: {
     template_app: {
