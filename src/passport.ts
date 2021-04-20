@@ -18,17 +18,19 @@ export const passportInitialize = (): void => {
         usernameField: 'email',
       },
       async (email, password, done) => {
-        const userInfo = await getUserByEmail(email);
+        try {
+          const userInfo = await getUserByEmail(email);
 
-        const hashedPassword = userInfo.PASSWORD;
+          const hashedPassword = userInfo.PASSWORD;
 
-        const authenticated = await compareHash(password, hashedPassword);
+          const authenticated = await compareHash(password, hashedPassword);
 
-        if (!authenticated) {
-          throw new AppError(`Comparison of entered and stored passwords resulted false for email: ${email}`, 'Unauthorized', 401);
-        }
+          if (!authenticated) {
+            throw new AppError(`Comparison of entered and stored passwords resulted false for email: ${email}`, 'Unauthorized', 401);
+          }
 
-        done(null, userInfo);
+          done(null, userInfo);
+        } catch (e) { done(e); }  // same as next(e) in regular middleware
       }
     ),
   );
@@ -42,13 +44,13 @@ export const passportInitialize = (): void => {
         callbackURL: 'http://fakedomaingideon.com/auth/google/redirect',
       },
       async (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) => {
-
-        const res = await callProcedure('CREATE$GOOGLE_USER', {
-          EMAIL: profile._json.email,
-          GOOGLE_ID: profile.id,
-        });
-
-        done(null, res);
+        try {
+          const res = await callProcedure('CREATE$GOOGLE_USER', {
+            EMAIL: profile._json.email,
+            GOOGLE_ID: profile.id,
+          });
+          done(null, res);
+        } catch (e) { done(e); }  // same as next(e) in regular middleware
       },
     ),
   );
@@ -67,7 +69,6 @@ export const passportInitialize = (): void => {
     done(null, user);
   });
 };
-
 
 
 const getUserByEmail = async (EMAIL: string, onlyVerified = true): Promise<any> => {

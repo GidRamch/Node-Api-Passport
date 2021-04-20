@@ -1,26 +1,10 @@
 import config from '../../../config/config';
 import { AppError } from '../../models/AppError';
-import { compareHash, getHash } from '../../services/hasher';
+import { getHash } from '../../services/hasher';
 import { signData, verifyToken } from '../../services/jwt';
 import { sendMail } from '../../services/maling';
 import { callProcedure } from '../../services/mysql';
 
-
-export const login = async (EMAIL: string, PASSWORD: string): Promise<unknown> => {
-  const userInfo = await getUserInfo(EMAIL);
-
-  const hashedPassword = userInfo.PASSWORD;
-
-  const authenticated = await compareHash(PASSWORD, hashedPassword);
-
-  delete userInfo.PASSWORD;
-
-  if (!authenticated) {
-    throw new AppError(`Comparison of entered and stored passwords resulted false for email: ${EMAIL}`, 'Unauthorized', 401);
-  }
-
-  return userInfo;
-};
 
 
 const getUserInfo = async (EMAIL: string, onlyVerified = true): Promise<any> => {

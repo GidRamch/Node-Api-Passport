@@ -68,12 +68,6 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       req.logOut();
-      await new Promise((resolve, reject) => {
-        req.session.destroy((err: Error) => {
-          if (err) { reject(err); }
-          resolve(null);
-        });
-      });
       res.send();
     } catch (err) { next(err); }
   },

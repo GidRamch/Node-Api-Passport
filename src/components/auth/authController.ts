@@ -1,9 +1,10 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { authenticate } from 'passport';
+import { isAuthenticated } from '../../middleware/auth';
 import { validate } from '../../middleware/validator';
 import { AppError } from '../../models/AppError';
 import { logger } from '../../services/logger';
-import { forgotPassword, login, register, resetPassword, verifyUser } from './authDAL';
+import { forgotPassword, register, resetPassword, verifyUser } from './authDAL';
 import { getAuthValidationRules } from './authValidator';
 
 const router = express.Router();
@@ -11,6 +12,9 @@ const router = express.Router();
 const baseRoute = '/auth';
 
 
+/**
+ * Login using passport local strategy
+ */
 router.post(
   `${baseRoute}/login`,
   getAuthValidationRules('login'),
@@ -22,49 +26,49 @@ router.post(
 );
 
 
-
+/**
+ * Route used if login failed. Sends 200 to user.
+ */
 router.get(
   `${baseRoute}/success`,
-  async (req: Request, res: Response) => {
+  isAuthenticated,
+  (req: Request, res: Response) => {
     logger.info(`GET ${baseRoute}/success`);
-
     res.send(req.user);
   },
 );
 
 
+/**
+ * Route used if login failed. Sends 401 to user.
+ */
 router.get(
   `${baseRoute}/failed`,
-  async (req: Request, res: Response) => {
+  (req: Request, res: Response) => {
     logger.info(`GET ${baseRoute}/failed`);
     throw new AppError('User failed to login with local strategy!', 'Login Failed!', 401);
   },
 );
 
 
+/**
+ * Use passport to log user out and destroy session
+ */
 router.post(
-  `${baseRoute}/login2`,
-  getAuthValidationRules('login'),
-  validate,
-  async (req: Request, res: Response, next: NextFunction) => {
-
-    logger.info(`POST /${baseRoute}/login`);
-
+  `${baseRoute}/logout`,
+  isAuthenticated,
+  (req: Request, res: Response, next: NextFunction) => {
     try {
-      const EMAIL = req.body.email;
-      const PASSWORD = req.body.password;
-
-      const data = await login(EMAIL, PASSWORD);
-
-      res.status(200).send(data);
-
-    } catch (err) {
-      next(err);
-    }
-  }
+      req.logOut();
+      res.send();
+    } catch (err) { next(err); }
+  },
 );
 
 
+/**
+ * Create user and sends verification token to email.
+ */
 router.post(
   `${baseRoute}/register`,
   getAuthValidationRules('register'),
@@ -89,6 +93,10 @@ router.post(
 );
 
 
+/**
+ * Accepts token contained in register email and uses it to mark
+ * correspondinguser as verified.
+ */
 router.put(
   `${baseRoute}/verify-user/:token`,
   getAuthValidationRules('verify-user'),
@@ -111,6 +119,9 @@ router.put(
 );
 
 
+/**
+ * Send email link containing token to use to reset password.
+ */
 router.post(
   `${baseRoute}/forgot-password`,
   getAuthValidationRules('forgot-password'),
@@ -134,7 +145,10 @@ router.post(
 );
 
 
-
+/**
+ * Accept token from forget-password email link and use it along with
+ * passed in email and password to change user's password
+ */
 router.put(
   `${baseRoute}/reset-password/:token`,
   getAuthValidationRules('reset-password'),
