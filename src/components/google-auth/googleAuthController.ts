@@ -9,6 +9,9 @@ const router = express.Router();
 const baseRoute = '/auth/google';
 
 
+/**
+ * Login user using passport google strategy
+ */
 router.get(
   `${baseRoute}/login`,
   (req: Request, res: Response, next: NextFunction) => {
@@ -27,10 +30,13 @@ router.get(
 );
 
 
+/**
+ * Google login redirects here to handle login request
+ */
 router.get(
   `${baseRoute}/redirect`,
   authenticate('google', { failureRedirect: `${baseRoute}/failed` }),
-  async (req: Request, res: Response) => {
+  (req: Request, res: Response) => {
     logger.info(`GET /${baseRoute}/redirect`);
 
     const state = JSON.parse(req.query.state as string);
@@ -44,6 +50,9 @@ router.get(
 );
 
 
+/**
+ * If google errors out, this route is used to send the user an appropriate message
+ */
 router.get(
   `${baseRoute}/failed`,
   (req: Request, res: Response, next: NextFunction) => {
@@ -53,19 +62,13 @@ router.get(
 );
 
 
-router.get(
-  `${baseRoute}/test-auth`,
-  isAuthenticated,
-  (req: Request, res: Response) => {
-    res.send();
-  },
-);
-
-
+/**
+ * Used to logout user using passport and destroy corresponding session.
+ */
 router.get(
   `${baseRoute}/logout`,
   isAuthenticated,
-  async (req: Request, res: Response, next: NextFunction) => {
+  (req: Request, res: Response, next: NextFunction) => {
     try {
       req.logOut();
       res.send();
