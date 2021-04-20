@@ -26,6 +26,7 @@ interface CustomEnv {
   },
   secrets: {
     JWT: string;
+    cookie: string;
     googleDesktopClientId: string;
     googleDesktopClientSecret: string;
   },
@@ -57,6 +58,7 @@ const dev: CustomEnv = {
   },
   secrets: {
     JWT: process.env.JWTSecret as string,
+    cookie: process.env.cookieSecret as string,
     googleDesktopClientId: process.env.GOOGLE_DESKTOP_CLIENT_ID as string,
     googleDesktopClientSecret: process.env.GOOGLE_DESKTOP_CLIENT_SECRET as string,
   },

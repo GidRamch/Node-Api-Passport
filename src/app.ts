@@ -7,6 +7,7 @@ import { components } from './components/components';
 import { handleError } from './services/error-handler';
 import { logger } from './services/logger';
 import { passportInitialize } from './services/passport';
+import config from '../config/config';
 
 /** Create Express App */
 
@@ -19,7 +20,7 @@ app.use(helmet());
 app.use(express.json());
 
 app.use(expressSession({
-  secret: 'cookie-secret',
+  secret: config.secrets.cookie,
   resave: false,
   saveUninitialized: true,
   // cookie: { secure: true },
