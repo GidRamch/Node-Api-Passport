@@ -14,6 +14,7 @@ export const passportInitialize = (): void => {
         callbackURL: 'http://fakedomaingideon.com/auth/google/redirect',
       },
       async (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) => {
+
         const res = await callProcedure('CREATE$GOOGLE_USER', {
           EMAIL: profile._json.email,
           GOOGLE_ID: profile.id,
@@ -24,6 +25,7 @@ export const passportInitialize = (): void => {
     ),
   );
 
+
   passport.serializeUser(async (user: any, done: VerifyCallback) => {
     logger.info(`GOOGLE AUTH serialize -> user: ${JSON.stringify(user)}`);
     done(null, user.ID);
@@ -31,11 +33,8 @@ export const passportInitialize = (): void => {
 
 
   passport.deserializeUser(async (ID: number, done: VerifyCallback) => {
-
     logger.info('GOOGLE AUTH deserialize');
-    const user = await callProcedure('READ$USER_INFO_VIA_ID', {
-      ID,
-    });
+    const user = await callProcedure('READ$USER_INFO_VIA_ID', { ID });
     logger.info(`GOOGLE AUTH deserialize -> user info: ${JSON.stringify(user)}`);
     done(null, ID);
   });
