@@ -57,9 +57,12 @@ router.get(
 router.post(
   `${baseRoute}/logout`,
   isAuthenticated,
-  (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      req.logOut();
+      req.logout();
+      await new Promise((resolve, reject) => {
+        req.session.destroy(err => { if (err) { reject(); } else { resolve(true); } });
+      });
       res.send();
     } catch (err) { next(err); }
   },

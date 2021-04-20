@@ -2,6 +2,8 @@ import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import passport from 'passport';
 import expressSession from 'express-session';
+import redis from 'redis';
+import connectRedis from 'connect-redis';
 
 import config from '../config/config';
 import { components } from './components/components';
@@ -20,11 +22,39 @@ const app = express();
 app.use(helmet());
 app.use(express.json());
 
+
+/** Setup REDIS */
+
+const RedisStore = connectRedis(expressSession);
+
+const redisClient = redis.createClient({
+  host: '127.0.0.1',
+  port: 6379
+});
+
+redisClient.on('error', function (err) {
+  logger.info('Could not establish a connection with redis.');
+  throw err;
+});
+
+redisClient.on('connect', function () {
+  logger.info('Connected to redis successfully');
+});
+
+
+
+/** Set up sessions and passport */
+
 app.use(expressSession({
+  store: new RedisStore({client: redisClient}),
   secret: config.secrets.cookie,
   resave: false,
   saveUninitialized: true,
-  // cookie: { secure: true },
+  cookie: {
+    secure: false,
+    httpOnly: false,
+    maxAge: 1000 * 60 * 10,
+  },
 }));
 
 app.use(passport.initialize());
