@@ -3,11 +3,12 @@ import helmet from 'helmet';
 import passport from 'passport';
 import expressSession from 'express-session';
 
+import config from '../config/config';
 import { components } from './components/components';
 import { handleError } from './services/error-handler';
 import { logger } from './services/logger';
 import { passportInitialize } from './passport';
-import config from '../config/config';
+
 
 /** Create Express App */
 

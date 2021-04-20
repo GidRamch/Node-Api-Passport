@@ -3,7 +3,6 @@ import { validationResult } from 'express-validator';
 import { AppError } from '../models/AppError';
 
 
-
 /**
  * Middleware to handle input validation for any routes - used after route specific rules are added
  */

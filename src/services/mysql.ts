@@ -1,5 +1,5 @@
-import config from '../../config/config';
 import mysql, { Pool } from 'mysql';
+import config from '../../config/config';
 import { logger } from './logger';
 
 
