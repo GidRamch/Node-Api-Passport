@@ -6,7 +6,7 @@ import expressSession from 'express-session';
 import { components } from './components/components';
 import { handleError } from './services/error-handler';
 import { logger } from './services/logger';
-import { passportInitialize } from './services/passport';
+import { passportInitialize } from './passport';
 import config from '../config/config';
 
 /** Create Express App */

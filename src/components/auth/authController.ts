@@ -1,5 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
+import { authenticate } from 'passport';
 import { validate } from '../../middleware/validator';
+import { AppError } from '../../models/AppError';
 import { logger } from '../../services/logger';
 import { forgotPassword, login, register, resetPassword, verifyUser } from './authDAL';
 import { getAuthValidationRules } from './authValidator';
@@ -11,6 +13,37 @@ const baseRoute = '/auth';
 
 router.post(
   `${baseRoute}/login`,
+  getAuthValidationRules('login'),
+  validate,
+  authenticate('local', {
+    successRedirect: `${baseRoute}/success`,
+    failureRedirect: `${baseRoute}/failed`,
+  }),
+);
+
+
+
+router.get(
+  `${baseRoute}/success`,
+  async (req: Request, res: Response) => {
+    logger.info(`GET ${baseRoute}/success`);
+
+    res.send(req.user);
+  },
+);
+
+
+router.get(
+  `${baseRoute}/failed`,
+  async (req: Request, res: Response) => {
+    logger.info(`GET ${baseRoute}/failed`);
+    throw new AppError('User failed to login with local strategy!', 'Login Failed!', 401);
+  },
+);
+
+
+router.post(
+  `${baseRoute}/login2`,
   getAuthValidationRules('login'),
   validate,
   async (req: Request, res: Response, next: NextFunction) => {
