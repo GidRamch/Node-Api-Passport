@@ -1,6 +1,8 @@
 import passport from 'passport';
-import { Strategy as GoogleStrategy }  from 'passport-google-oauth20';
+import { Profile, Strategy as GoogleStrategy, VerifyCallback } from 'passport-google-oauth20';
 import config from '../../config/config';
+import { logger } from './logger';
+import { callProcedure } from './mysql';
 
 
 export const passportInitialize = (): void => {
@@ -9,11 +11,32 @@ export const passportInitialize = (): void => {
       {
         clientID: config.secrets.googleDesktopClientId,
         clientSecret: config.secrets.googleDesktopClientSecret,
-        callbackURL: '/auth/google/redirect',
+        callbackURL: 'http://fakedomaingideon.com/auth/google/redirect',
       },
-      accessToken => {
-        console.log('access token: ', accessToken);
+      async (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) => {
+        const res = await callProcedure('CREATE$GOOGLE_USER', {
+          EMAIL: profile._json.email,
+          GOOGLE_ID: profile.id,
+        });
+
+        done(null, res);
       },
     ),
   );
+
+  passport.serializeUser(async (user: any, done: VerifyCallback) => {
+    logger.info(`GOOGLE AUTH serialize -> user: ${JSON.stringify(user)}`);
+    done(null, user.ID);
+  });
+
+
+  passport.deserializeUser(async (ID: number, done: VerifyCallback) => {
+
+    logger.info('GOOGLE AUTH deserialize');
+    const user = await callProcedure('READ$USER_INFO_VIA_ID', {
+      ID,
+    });
+    logger.info(`GOOGLE AUTH deserialize -> user info: ${JSON.stringify(user)}`);
+    done(null, ID);
+  });
 };
