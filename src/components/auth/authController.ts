@@ -34,6 +34,9 @@ router.get(
   isAuthenticated,
   (req: Request, res: Response) => {
     logger.info(`GET ${baseRoute}/success`);
+
+    delete (req.user as any).PASSWORD;
+
     res.send(req.user);
   },
 );
@@ -181,6 +184,7 @@ router.put(
  */
 router.post(
   `${baseRoute}/change-password`,
+  isAuthenticated,
   getAuthValidationRules('change-password'),
   validate,
   async (req: Request, res: Response, next: NextFunction) => {
