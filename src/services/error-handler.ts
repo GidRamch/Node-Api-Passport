@@ -20,6 +20,20 @@ export const handleError = (error: Error, res?: Response): void => {
     return;
   }
 
+
+  if ((error instanceof SyntaxError && (error as any).status === 400 && 'body' in error)) {
+
+    if (res && !res.headersSent) {
+      console.log((error as any).message);
+      res.status(400).json({ message: (error as any).message });
+    }
+
+    logger.warn(error);
+
+    return;
+  }
+
+
   if (res && !res.headersSent) {
     res.status(500).send('There was an internal server error');
   }
