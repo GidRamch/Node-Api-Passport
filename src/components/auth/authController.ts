@@ -4,7 +4,7 @@ import { isAuthenticated } from '../../middleware/auth';
 import { validate } from '../../middleware/validator';
 import { AppError } from '../../models/AppError';
 import { logger } from '../../services/logger';
-import { forgotPassword, register, resetPassword, verifyUser } from './authDAL';
+import { changePassword, forgotPassword, register, resetPassword, verifyUser } from './authDAL';
 import { getAuthValidationRules } from './authValidator';
 
 const router = express.Router();
@@ -166,6 +166,34 @@ router.put(
       const TOKEN = req.params.token;
 
       const data = await resetPassword(PASSWORD, TOKEN, EMAIL);
+
+      res.status(200).send(data);
+
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+/**
+ * Allows logged-in user to change their password
+ */
+router.post(
+  `${baseRoute}/change-password`,
+  getAuthValidationRules('change-password'),
+  validate,
+  async (req: Request, res: Response, next: NextFunction) => {
+
+    logger.info(`PUT /${baseRoute}/reset-password`);
+
+    try {
+      const PASSWORD = req.body.password;
+      const NEW_PASSWORD = req.body.new_password;
+
+      console.log(req.user);
+
+      const data = await changePassword(req.user, PASSWORD, NEW_PASSWORD);
 
       res.status(200).send(data);
 

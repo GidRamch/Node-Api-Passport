@@ -9,10 +9,17 @@ const email = [
 ];
 
 const password = [
-  body('password', 'You must provide an password!').exists(),
+  body('password', 'You must provide a password!').exists(),
   body('password', 'Password must be a string!').isString(),
   body('password', 'Password must be atleast 5 characters long!').isLength({ min: 5 }),
   body('password', 'Password must be at most 20 characters long!').isLength({ max: 20 }),
+];
+
+const new_password = [
+  body('new_password', 'You must provide a new_password!').exists(),
+  body('new_password', 'New Password must be a string!').isString(),
+  body('new_password', 'New Password must be atleast 5 characters long!').isLength({ min: 5 }),
+  body('new_password', 'New Password must be at most 20 characters long!').isLength({ max: 20 }),
 ];
 
 const token = [
@@ -51,7 +58,11 @@ const rules: Record<string, ValidationChain[]> = {
     ...token,
     ...password,
     ...email,
-  ]
+  ],
+  'change-password': [
+    ...password,
+    ...new_password,
+  ],
 };
 
 
