@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { authenticate } from 'passport';
+import { HTTP_STATUS } from '../../enums/HTTP_STATUS';
 import { isAuthenticated } from '../../middleware/auth';
 import { AppError } from '../../models/AppError';
 import { logger } from '../../services/logger';
@@ -57,7 +58,7 @@ router.get(
   `${baseRoute}/failed`,
   (req: Request, res: Response, next: NextFunction) => {
     logger.info(`GET /${baseRoute}/failed`);
-    throw new AppError('User failed to login with google!', 'Login Failed!', 401);
+    throw new AppError('User failed to login with google!', HTTP_STATUS.UNAUTHORIZED.MESSAGE, HTTP_STATUS.UNAUTHORIZED.CODE);
   },
 );
 

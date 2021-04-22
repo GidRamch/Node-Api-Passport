@@ -1,4 +1,5 @@
 import config from '../../../config/config';
+import { HTTP_STATUS } from '../../enums/HTTP_STATUS';
 import { AppError } from '../../models/AppError';
 import { compareHash, getHash } from '../../services/hasher';
 import { signData, verifyToken } from '../../services/jwt';
@@ -7,14 +8,19 @@ import { callProcedure } from '../../services/mysql';
 
 
 
-const getUserByEmail = async (EMAIL: string, onlyVerified = true): Promise<any> => {
+const getUserByEmail = async (EMAIL: string): Promise<any> => {
   const mysqlData = await callProcedure(
     'READ$USER_INFO_VIA_EMAIL',
     { EMAIL }
   );
 
-  if (!mysqlData?.PASSWORD) { throw new AppError(`No Password found for given email: ${EMAIL}`, 'Unauthorized', 403); }
-  if (!mysqlData?.VERIFIED && onlyVerified) { throw new AppError(`Account not verified: ${EMAIL}`, 'Not Verified!', 403); }
+  if (!mysqlData?.PASSWORD) {
+    throw new AppError(
+      `No Password found for given email: ${EMAIL}`,
+      HTTP_STATUS.UNAUTHORIZED.MESSAGE,
+      HTTP_STATUS.UNAUTHORIZED.CODE,
+    );
+  }
 
   return mysqlData;
 };
@@ -29,7 +35,7 @@ export const register = async (EMAIL: string, PASSWORD: string, APP_ID: string):
     { EMAIL, PASSWORD: hashedPassword }
   );
 
-  if (!mysqlData?.ID) { throw new Error(`Failed to create user with email: ${EMAIL}`); }
+  if (!mysqlData?.ID) { throw new AppError(`Failed to create user with email: ${EMAIL}`, HTTP_STATUS.CONFLICT.MESSAGE, HTTP_STATUS.CONFLICT.CODE); }
 
   const token = await signData({ email: EMAIL });
 
@@ -51,7 +57,7 @@ export const verifyUser = async (TOKEN: string): Promise<unknown> => {
 
   const tokenData = await verifyToken(TOKEN)
     .catch((err: Error) => {
-      throw new AppError(err.message, 'Bad Request', 400);
+      throw new AppError(err.message, HTTP_STATUS.BAD_REQUEST.MESSAGE, HTTP_STATUS.BAD_REQUEST.CODE);
     });
 
   const mysqlData = await callProcedure(
@@ -64,7 +70,7 @@ export const verifyUser = async (TOKEN: string): Promise<unknown> => {
 
 
 export const forgotPassword = async (EMAIL: string, APP_ID: string): Promise<unknown> => {
-  const userInfo = await getUserByEmail(EMAIL, false);
+  const userInfo = await getUserByEmail(EMAIL);
 
   const token = await signData({ email: EMAIL }, '15m', userInfo.PASSWORD);
 
@@ -85,14 +91,20 @@ export const forgotPassword = async (EMAIL: string, APP_ID: string): Promise<unk
 
 
 export const resetPassword = async (PASSWORD: string, TOKEN: string, EMAIL: string): Promise<unknown> => {
-  const userInfo = await getUserByEmail(EMAIL, false);
+  const userInfo = await getUserByEmail(EMAIL);
 
   const tokenData = await verifyToken(TOKEN, userInfo.PASSWORD)
     .catch((err: Error) => {
-      throw new AppError(err.message, 'Bad Request', 400);
+      throw new AppError(err.message, HTTP_STATUS.BAD_REQUEST.MESSAGE, HTTP_STATUS.BAD_REQUEST.CODE);
     });
 
-  if (tokenData.email !== EMAIL) { throw new AppError('RESET PASSWORD -> Token email and input email did not match', 'Bad Request', 400); }
+  if (tokenData.email !== EMAIL) {
+    throw new AppError(
+      'RESET PASSWORD -> Token email and input email did not match',
+      HTTP_STATUS.BAD_REQUEST.MESSAGE,
+      HTTP_STATUS.BAD_REQUEST.CODE,
+    );
+  }
 
   const hashedPassword = await getHash(PASSWORD);
 
@@ -113,7 +125,11 @@ export const changePassword = async (user: any, OLD_PASSWORD: string, NEW_PASSWO
   const authenticated = await compareHash(OLD_PASSWORD, hashedPassword);
 
   if (!authenticated) {
-    throw new AppError(`Comparison of entered and stored passwords resulted false for email: ${user.EMAIL}`, 'Unauthorized', 401);
+    throw new AppError(
+      `Comparison of entered and stored passwords resulted false for email: ${user.EMAIL}`,
+      HTTP_STATUS.UNAUTHORIZED.MESSAGE,
+      HTTP_STATUS.UNAUTHORIZED.CODE,
+    );
   }
 
   const hashedNewPassword = await getHash(NEW_PASSWORD);

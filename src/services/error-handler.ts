@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { HTTP_STATUS } from '../enums/HTTP_STATUS';
 import { AppError } from '../models/AppError';
 import { logger } from './logger';
 
@@ -25,7 +26,7 @@ export const handleError = (error: Error, res?: Response): void => {
 
     if (res && !res.headersSent) {
       console.log((error as any).message);
-      res.status(400).json({ message: (error as any).message });
+      res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({ message: (error as any).message });
     }
 
     logger.warn(error);
@@ -35,7 +36,9 @@ export const handleError = (error: Error, res?: Response): void => {
 
 
   if (res && !res.headersSent) {
-    res.status(500).send('There was an internal server error');
+    res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE)
+      .send(HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE);
   }
 
 

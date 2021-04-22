@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { authenticate } from 'passport';
+import { HTTP_STATUS } from '../../enums/HTTP_STATUS';
 import { isAuthenticated } from '../../middleware/auth';
 import { validate } from '../../middleware/validator';
 import { AppError } from '../../models/AppError';
@@ -49,7 +50,7 @@ router.get(
   `${baseRoute}/failed`,
   (req: Request, res: Response) => {
     logger.info(`GET ${baseRoute}/failed`);
-    throw new AppError('User failed to login with local strategy!', 'Login Failed!', 401);
+    throw new AppError('User failed to login with local strategy!', HTTP_STATUS.UNAUTHORIZED.MESSAGE, HTTP_STATUS.UNAUTHORIZED.CODE);
   },
 );
 
@@ -90,7 +91,7 @@ router.post(
 
       const data = await register(EMAIL, PASSWORD, APP_ID);
 
-      res.status(200).send(data);
+      res.send(data);
 
     } catch (err) {
       next(err);
@@ -116,7 +117,7 @@ router.put(
 
       const data = await verifyUser(TOKEN);
 
-      res.status(200).send(data);
+      res.send(data);
 
     } catch (err) {
       next(err);
@@ -142,7 +143,7 @@ router.post(
 
       const data = await forgotPassword(EMAIL, APP_ID);
 
-      res.status(200).send(data);
+      res.send(data);
 
     } catch (err) {
       next(err);
@@ -170,7 +171,7 @@ router.put(
 
       const data = await resetPassword(PASSWORD, TOKEN, EMAIL);
 
-      res.status(200).send(data);
+      res.send(data);
 
     } catch (err) {
       next(err);
@@ -199,7 +200,7 @@ router.post(
 
       const data = await changePassword(req.user, PASSWORD, NEW_PASSWORD);
 
-      res.status(200).send(data);
+      res.send(data);
 
     } catch (err) {
       next(err);

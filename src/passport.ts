@@ -4,6 +4,7 @@ import { Profile, Strategy as GoogleStrategy, VerifyCallback } from 'passport-go
 import { Strategy as LocalStategy } from 'passport-local';
 
 import config from '../config/config';
+import { HTTP_STATUS } from './enums/HTTP_STATUS';
 import { AppError } from './models/AppError';
 import { compareHash } from './services/hasher';
 import { logger } from './services/logger';
@@ -26,7 +27,11 @@ export const passportInitialize = (): void => {
           const authenticated = await compareHash(password, hashedPassword);
 
           if (!authenticated) {
-            throw new AppError(`Comparison of entered and stored passwords resulted false for email: ${email}`, 'Unauthorized', 401);
+            throw new AppError(
+              `Comparison of entered and stored passwords resulted false for email: ${email}`,
+              HTTP_STATUS.UNAUTHORIZED.MESSAGE,
+              HTTP_STATUS.UNAUTHORIZED.CODE,
+            );
           }
 
           done(null, userInfo);
@@ -77,8 +82,20 @@ const getUserByEmail = async (EMAIL: string, onlyVerified = true): Promise<any> 
     { EMAIL }
   );
 
-  if (!mysqlData?.PASSWORD) { throw new AppError(`No Password found for given email: ${EMAIL}`, 'Unauthorized', 403); }
-  if (!mysqlData?.VERIFIED && onlyVerified) { throw new AppError(`Account not verified: ${EMAIL}`, 'Not Verified!', 403); }
+  if (!mysqlData?.PASSWORD) {
+    throw new AppError(
+      `No Password found for given email: ${EMAIL}`,
+      HTTP_STATUS.UNAUTHORIZED.MESSAGE,
+      HTTP_STATUS.UNAUTHORIZED.CODE,
+    );
+  }
+  if (!mysqlData?.VERIFIED && onlyVerified) {
+    throw new AppError(
+      `Account not verified: ${EMAIL}`,
+      HTTP_STATUS.FORBIDDEN.MESSAGE,
+      HTTP_STATUS.FORBIDDEN.CODE,
+    );
+  }
 
   return mysqlData;
 };
