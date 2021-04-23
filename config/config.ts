@@ -24,6 +24,7 @@ interface CustomEnv {
     password: string;
     schema: string;
   },
+  redis: URL,
   secrets: {
     JWT: string;
     cookie: string;
@@ -49,6 +50,11 @@ const dev: CustomEnv = {
     protocol: 'http',
     port: 3333,
     from: 'Gideon Ramcharan <gidramch@gmail.com>',
+  },
+  redis: {
+    host: '127.0.0.1',
+    protocol: 'http',
+    port: 6379,
   },
   db: {
     host: '127.0.0.1',

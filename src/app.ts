@@ -28,8 +28,8 @@ app.use(express.json());
 const RedisStore = connectRedis(expressSession);
 
 const redisClient = redis.createClient({
-  host: '127.0.0.1',
-  port: 6379
+  host: config.redis.host,
+  port: config.redis.port,
 });
 
 redisClient.on('error', function (err) {
