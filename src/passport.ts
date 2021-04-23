@@ -76,20 +76,27 @@ export const passportInitialize = (): void => {
 };
 
 
-const getUserByEmail = async (EMAIL: string, onlyVerified = true): Promise<any> => {
+const getUserByEmail = async (EMAIL: string): Promise<any> => {
   const mysqlData = await callProcedure(
     'READ$USER_INFO_VIA_EMAIL',
     { EMAIL }
   );
 
-  if (!mysqlData?.PASSWORD) {
+  if (!mysqlData) {
     throw new AppError(
-      `No Password found for given email: ${EMAIL}`,
+      `No user found with given email: ${EMAIL}`,
       HTTP_STATUS.UNAUTHORIZED.MESSAGE,
       HTTP_STATUS.UNAUTHORIZED.CODE,
     );
   }
-  if (!mysqlData?.VERIFIED && onlyVerified) {
+  if (!mysqlData.PASSWORD) {
+    throw new AppError(
+      `No Password found for user with given email: ${EMAIL}`,
+      HTTP_STATUS.UNAUTHORIZED.MESSAGE,
+      HTTP_STATUS.UNAUTHORIZED.CODE,
+    );
+  }
+  if (!mysqlData.VERIFIED) {
     throw new AppError(
       `Account not verified: ${EMAIL}`,
       HTTP_STATUS.FORBIDDEN.MESSAGE,

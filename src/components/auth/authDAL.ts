@@ -14,11 +14,25 @@ const getUserByEmail = async (EMAIL: string): Promise<any> => {
     { EMAIL }
   );
 
-  if (!mysqlData?.PASSWORD) {
+  if (!mysqlData) {
     throw new AppError(
-      `No Password found for given email: ${EMAIL}`,
+      `No user found with given email: ${EMAIL}`,
       HTTP_STATUS.UNAUTHORIZED.MESSAGE,
       HTTP_STATUS.UNAUTHORIZED.CODE,
+    );
+  }
+  if (!mysqlData.PASSWORD) {
+    throw new AppError(
+      `No Password found for user with given email: ${EMAIL}`,
+      HTTP_STATUS.UNAUTHORIZED.MESSAGE,
+      HTTP_STATUS.UNAUTHORIZED.CODE,
+    );
+  }
+  if (!mysqlData.VERIFIED) {
+    throw new AppError(
+      `Account not verified: ${EMAIL}`,
+      HTTP_STATUS.FORBIDDEN.MESSAGE,
+      HTTP_STATUS.FORBIDDEN.CODE,
     );
   }
 
@@ -29,6 +43,16 @@ const getUserByEmail = async (EMAIL: string): Promise<any> => {
 export const register = async (EMAIL: string, PASSWORD: string, APP_ID: string): Promise<unknown> => {
 
   const hashedPassword = await getHash(PASSWORD);
+
+  // CHECK FOR DUPLICATE USER FIRST
+  const user = await callProcedure(
+    'READ$USER_INFO_VIA_EMAIL',
+    { EMAIL }
+  );
+
+  if (user) {
+    throw new AppError(`User with given email (${EMAIL}) already exists`, HTTP_STATUS.CONFLICT.MESSAGE, HTTP_STATUS.CONFLICT.CODE);
+  }
 
   const mysqlData = await callProcedure(
     'CREATE$USER',
