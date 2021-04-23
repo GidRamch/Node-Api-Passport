@@ -25,7 +25,6 @@ export const handleError = (error: Error, res?: Response): void => {
   if ((error instanceof SyntaxError && (error as any).status === 400 && 'body' in error)) {
 
     if (res && !res.headersSent) {
-      console.log((error as any).message);
       res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({ message: (error as any).message });
     }
 

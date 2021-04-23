@@ -196,8 +196,6 @@ router.post(
       const PASSWORD = req.body.password;
       const NEW_PASSWORD = req.body.new_password;
 
-      console.log(req.user);
-
       const data = await changePassword(req.user, PASSWORD, NEW_PASSWORD);
 
       res.send(data);
