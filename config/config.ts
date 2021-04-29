@@ -1,42 +1,25 @@
 import dotenv from 'dotenv';
+import { CustomEnv } from '../src/models/CustomEnv';
 
-dotenv.config({
-  path: './config/.env'
-});
-
-// INTERFACES TO STRONGLY TYPE
+dotenv.config({ path: './config/.env' });
+const env = process.env.NODE_ENV || 'dev';
 
 
-interface URL {
-  host: string;
-  protocol: string;
-  port: number;
-}
-
-interface MailingUrl extends URL {
-  from: string;
-}
-
-interface CustomEnv {
-  app: URL,
-  mailing: MailingUrl,
-  db: {
-    host: string;
-    user: string;
-    password: string;
-    schema: string;
-  },
-  redis: URL,
-  secrets: {
-    JWT: string;
-    cookie: string;
-    googleDesktopClientId: string;
-    googleDesktopClientSecret: string;
-  },
-  clients: {
-    [id: string]: URL,
-  };
-}
+export const validateConfig = (conf: any, parentKey = env): void => {
+  try {
+    if (conf instanceof Object) {
+      for (const key of Object.keys(conf)) {
+        if (!conf[key] || ((conf[key] instanceof String) && !conf[key].length)) {
+          throw key;
+        } else if (conf[key] instanceof Object) {
+          validateConfig(conf[key], key);
+        }
+      }
+    }
+  } catch(key) {
+    throw `${parentKey}.${key}`;
+  }
+};
 
 
 // ENVIRONMENTS
@@ -45,7 +28,7 @@ const dev: CustomEnv = {
   app: {
     host: '0.0.0.0',
     protocol: 'http',
-    port:3050,
+    port: 3050,
   },
   mailing: {
     host: '0.0.0.0',
@@ -89,8 +72,6 @@ const dev: CustomEnv = {
 
 
 // CONFIGURING EXPORT - other files don't have to worry about which env is set
-
-const env = process.env.NODE_ENV || 'dev';
 
 const config: Record<string, CustomEnv> = {
   dev,
