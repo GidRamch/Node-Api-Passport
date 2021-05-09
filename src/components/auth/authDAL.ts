@@ -1,5 +1,5 @@
 import config from '../../../config/config';
-import { HTTP_STATUS } from '../../enums/HTTP_STATUS';
+import { BAD_REQUEST, CONFLICT, FORBIDDEN, UNAUTHORIZED } from '../../enums/HTTP_STATUS';
 import { AppError } from '../../models/AppError';
 import { compareHash, getHash } from '../../services/hasher';
 import { signData, verifyToken } from '../../services/jwt';
@@ -7,33 +7,18 @@ import { sendMail } from '../../services/maling';
 import { callProcedure } from '../../services/mysql';
 
 
-
 const getUserByEmail = async (EMAIL: string): Promise<any> => {
-  const mysqlData = await callProcedure(
-    'READ$USER_INFO_VIA_EMAIL',
-    { EMAIL }
-  );
+
+  const mysqlData = await callProcedure('READ$USER_INFO_VIA_EMAIL', { EMAIL });
 
   if (!mysqlData) {
-    throw new AppError(
-      `No user found with given email: ${EMAIL}`,
-      HTTP_STATUS.UNAUTHORIZED.MESSAGE,
-      HTTP_STATUS.UNAUTHORIZED.CODE,
-    );
+    throw new AppError(`No user found with given email: ${EMAIL}`, UNAUTHORIZED.MESSAGE, UNAUTHORIZED.CODE);
   }
   if (!mysqlData.PASSWORD) {
-    throw new AppError(
-      `No Password found for user with given email: ${EMAIL}`,
-      HTTP_STATUS.UNAUTHORIZED.MESSAGE,
-      HTTP_STATUS.UNAUTHORIZED.CODE,
-    );
+    throw new AppError(`No Password found for user with given email: ${EMAIL}`, UNAUTHORIZED.MESSAGE, UNAUTHORIZED.CODE);
   }
   if (!mysqlData.VERIFIED) {
-    throw new AppError(
-      `Account not verified: ${EMAIL}`,
-      HTTP_STATUS.FORBIDDEN.MESSAGE,
-      HTTP_STATUS.FORBIDDEN.CODE,
-    );
+    throw new AppError(`Account not verified: ${EMAIL}`, FORBIDDEN.MESSAGE, FORBIDDEN.CODE);
   }
 
   return mysqlData;
@@ -44,22 +29,15 @@ export const register = async (EMAIL: string, PASSWORD: string, APP_ID: string):
 
   const hashedPassword = await getHash(PASSWORD);
 
-  // CHECK FOR DUPLICATE USER FIRST
-  const user = await callProcedure(
-    'READ$USER_INFO_VIA_EMAIL',
-    { EMAIL }
-  );
+  const user = await callProcedure('READ$USER_INFO_VIA_EMAIL', { EMAIL });
 
   if (user) {
-    throw new AppError(`User with given email (${EMAIL}) already exists`, HTTP_STATUS.CONFLICT.MESSAGE, HTTP_STATUS.CONFLICT.CODE);
+    throw new AppError(`User with given email (${EMAIL}) already exists`, CONFLICT.MESSAGE, CONFLICT.CODE);
   }
 
-  const mysqlData = await callProcedure(
-    'CREATE$USER',
-    { EMAIL, PASSWORD: hashedPassword }
-  );
+  const mysqlData = await callProcedure('CREATE$USER', { EMAIL, PASSWORD: hashedPassword });
 
-  if (!mysqlData?.ID) { throw new AppError(`Failed to create user with email: ${EMAIL}`, HTTP_STATUS.CONFLICT.MESSAGE, HTTP_STATUS.CONFLICT.CODE); }
+  if (!mysqlData?.ID) { throw new AppError(`Failed to create user with email: ${EMAIL}`, CONFLICT.MESSAGE, CONFLICT.CODE); }
 
   const token = await signData({ email: EMAIL });
 
@@ -81,7 +59,7 @@ export const verifyUser = async (TOKEN: string): Promise<unknown> => {
 
   const tokenData = await verifyToken(TOKEN)
     .catch((err: Error) => {
-      throw new AppError(err.message, HTTP_STATUS.BAD_REQUEST.MESSAGE, HTTP_STATUS.BAD_REQUEST.CODE);
+      throw new AppError(err.message, BAD_REQUEST.MESSAGE, BAD_REQUEST.CODE);
     });
 
   const mysqlData = await callProcedure(
@@ -119,14 +97,14 @@ export const resetPassword = async (PASSWORD: string, TOKEN: string, EMAIL: stri
 
   const tokenData = await verifyToken(TOKEN, userInfo.PASSWORD)
     .catch((err: Error) => {
-      throw new AppError(err.message, HTTP_STATUS.BAD_REQUEST.MESSAGE, HTTP_STATUS.BAD_REQUEST.CODE);
+      throw new AppError(err.message, BAD_REQUEST.MESSAGE, BAD_REQUEST.CODE);
     });
 
   if (tokenData.email !== EMAIL) {
     throw new AppError(
       'RESET PASSWORD -> Token email and input email did not match',
-      HTTP_STATUS.BAD_REQUEST.MESSAGE,
-      HTTP_STATUS.BAD_REQUEST.CODE,
+      BAD_REQUEST.MESSAGE,
+      BAD_REQUEST.CODE,
     );
   }
 
@@ -151,8 +129,8 @@ export const changePassword = async (user: any, OLD_PASSWORD: string, NEW_PASSWO
   if (!authenticated) {
     throw new AppError(
       `Comparison of entered and stored passwords resulted false for email: ${user.EMAIL}`,
-      HTTP_STATUS.UNAUTHORIZED.MESSAGE,
-      HTTP_STATUS.UNAUTHORIZED.CODE,
+      UNAUTHORIZED.MESSAGE,
+      UNAUTHORIZED.CODE,
     );
   }
 

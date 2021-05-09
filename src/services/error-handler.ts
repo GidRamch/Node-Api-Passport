@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { HTTP_STATUS } from '../enums/HTTP_STATUS';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '../enums/HTTP_STATUS';
 import { AppError } from '../models/AppError';
 import { logger } from './logger';
 
@@ -25,7 +25,7 @@ export const handleError = (error: Error, res?: Response): void => {
   if ((error instanceof SyntaxError && (error as any).status === 400 && 'body' in error)) {
 
     if (res && !res.headersSent) {
-      res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({ message: (error as any).message });
+      res.status(BAD_REQUEST.CODE).json({ message: (error as any).message });
     }
 
     logger.warn(error);
@@ -36,8 +36,8 @@ export const handleError = (error: Error, res?: Response): void => {
 
   if (res && !res.headersSent) {
     res
-      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE)
-      .send(HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE);
+      .status(INTERNAL_SERVER_ERROR.CODE)
+      .send(INTERNAL_SERVER_ERROR.MESSAGE);
   }
 
 

@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { authenticate } from 'passport';
-import { HTTP_STATUS } from '../../enums/HTTP_STATUS';
+import { UNAUTHORIZED } from '../../enums/HTTP_STATUS';
 import { isAuthenticated } from '../../middleware/auth';
 import { validate } from '../../middleware/validator';
 import { AppError } from '../../models/AppError';
@@ -50,7 +50,7 @@ router.get(
   `${baseRoute}/failed`,
   (req: Request, res: Response) => {
     logger.info(`GET ${baseRoute}/failed`);
-    throw new AppError('User failed to login with local strategy!', HTTP_STATUS.UNAUTHORIZED.MESSAGE, HTTP_STATUS.UNAUTHORIZED.CODE);
+    throw new AppError('User failed to login with local strategy!', UNAUTHORIZED.MESSAGE, UNAUTHORIZED.CODE);
   },
 );
 

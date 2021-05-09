@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
-import { HTTP_STATUS } from '../enums/HTTP_STATUS';
+import { BAD_REQUEST } from '../enums/HTTP_STATUS';
 import { AppError } from '../models/AppError';
 
 
@@ -15,5 +15,5 @@ export const validate = (req: Request, res: Response, next: NextFunction): void 
 
   errors.array().forEach(err => allErrors[err.param] ? allErrors[err.param].push(err.msg) : allErrors[err.param] = [err.msg]);
 
-  throw new AppError(`Request Body Validation Failed for route: ${req.path}. Errors: ${JSON.stringify(allErrors)}`, allErrors, HTTP_STATUS.BAD_REQUEST.CODE);
+  throw new AppError(`Request Body Validation Failed for route: ${req.path}. Errors: ${JSON.stringify(allErrors)}`, allErrors, BAD_REQUEST.CODE);
 };
